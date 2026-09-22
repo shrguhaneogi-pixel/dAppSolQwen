@@ -1,0 +1,36 @@
+# deps
+/node_modules
+/.pnp
+.pnp.js
+
+# next
+/.next/
+/out/
+next-env.d.ts.bak
+
+# production
+/build
+
+# ts
+*.tsbuildinfo
+
+# anchor / rust
+/target
+/test-ledger
+anchor.keypair.json
+programs/**/*.so
+
+# env
+.env
+.env.local
+.env.*.local
+
+# wallets — never commit a keypair
+*.keypair.json
+id.json
+
+# editor / os
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json

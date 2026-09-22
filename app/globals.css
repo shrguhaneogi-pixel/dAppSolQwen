@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-ink-950 font-sans text-zinc-300 antialiased;
+    background-image:
+      radial-gradient(900px 500px at 12% -10%, rgba(34, 211, 238, 0.09), transparent 60%),
+      radial-gradient(700px 460px at 92% 4%, rgba(34, 227, 154, 0.07), transparent 62%),
+      radial-gradient(1100px 700px at 50% 120%, rgba(167, 139, 250, 0.07), transparent 70%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: rgba(34, 227, 154, 0.28);
+    color: #ecfeff;
+  }
+
+  ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.18);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(34, 211, 238, 0.35);
+  }
+}
+
+@layer components {
+  /* Frosted panel used for every card in the app. */
+  .glass {
+    position: relative;
+    border-radius: 1rem;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    background:
+      linear-gradient(180deg, rgba(14, 21, 34, 0.82) 0%, rgba(7, 10, 17, 0.86) 100%);
+    backdrop-filter: blur(14px);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
+      0 24px 60px -32px rgba(0, 0, 0, 0.9);
+  }
+
+  /* Hairline gradient border that only shows on the top edge. */
+  .glass-top::after {
+    content: "";
+    position: absolute;
+    inset-inline: 12%;
+    top: -1px;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(34, 211, 238, 0.55),
+      rgba(34, 227, 154, 0.4),
+      transparent
+    );
+  }
+
+  .label {
+    @apply font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500;
+  }
+
+  .value {
+    @apply font-mono text-2xl font-semibold tabular-nums text-zinc-50 sm:text-3xl;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-400;
+  }
+
+  .mono {
+    @apply font-mono tabular-nums;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(100deg, #f4faff 0%, #7dd3fc 42%, #22e39a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.28), 0 0 44px -10px rgba(34, 211, 238, 0.55);
+  }
+
+  .glow-mint {
+    box-shadow: 0 0 0 1px rgba(34, 227, 154, 0.3), 0 0 44px -10px rgba(34, 227, 154, 0.6);
+  }
+
+  .bg-dots {
+    background-image: radial-gradient(rgba(148, 163, 184, 0.16) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  .bg-lines {
+    background-image:
+      linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+
+  .mask-fade {
+    -webkit-mask-image: radial-gradient(circle at 50% 45%, #000 52%, transparent 78%);
+    mask-image: radial-gradient(circle at 50% 45%, #000 52%, transparent 78%);
+  }
+}
+
+/* Sonner theme tweaks so toasts match the dark shell. */
+:root {
+  --sonner-color-success: #22e39a;
+}
