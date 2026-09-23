@@ -3,6 +3,10 @@ name = "atmogrid"
 version = "0.1.0"
 description = "AtmoGrid — gamified DePIN air-quality oracle"
 edition = "2021"
+# Solana 1.18's SBF toolchain (platform-tools v1.41) ships rustc/cargo 1.75, so
+# dependency resolution must stay inside that MSRV — otherwise `anchor build`
+# cannot even parse the manifests it selects.
+rust-version = "1.75"
 license = "MIT"
 
 [lib]
