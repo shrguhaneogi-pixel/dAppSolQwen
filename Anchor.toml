@@ -7,10 +7,10 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-atmogrid = "FcftsuNT9C921cAIfPuH7Kb3YmL5PVg8ifKFwMKcqCHc"
+atmogrid = "GfJM3NJZpCqpaqqYrTk1xqytUm5TUHARK9NH3oCTg2gW"
 
 [programs.devnet]
-atmogrid = "FcftsuNT9C921cAIfPuH7Kb3YmL5PVg8ifKFwMKcqCHc"
+atmogrid = "GfJM3NJZpCqpaqqYrTk1xqytUm5TUHARK9NH3oCTg2gW"
 
 [registry]
 url = "https://api.apr.dev"

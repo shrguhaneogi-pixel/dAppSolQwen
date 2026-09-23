@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 // PLACEHOLDER — replace with the real deployed id:
 //   anchor keys sync        (writes the id back into this file + Anchor.toml)
 //   export NEXT_PUBLIC_PROGRAM_ID=<id>
-declare_id!("FcftsuNT9C921cAIfPuH7Kb3YmL5PVg8ifKFwMKcqCHc");
+declare_id!("GfJM3NJZpCqpaqqYrTk1xqytUm5TUHARK9NH3oCTg2gW");
 
 /// PDA seed prefix. The frontend derives the same address with
 /// `["sensor", authority_pubkey]` — keep these in lock-step.

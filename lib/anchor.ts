@@ -87,11 +87,11 @@ export async function encodeInitializeNode(
     programId: id,
     keys: [
       // Program-derived account created by `init` → signed by the program.
-      { pubkey: sensorNode, isSigner: true, isWritable: true },
+      { pubkey: sensorNode, isSigner: false, isWritable: true },
       { pubkey: authority, isSigner: true, isWritable: true },
       { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
     ],
-    data,
+    data: Buffer.from(data),
   });
 }
 
@@ -112,7 +112,7 @@ export async function encodeSubmitData(
       { pubkey: sensorNode, isSigner: false, isWritable: true },
       { pubkey: authority, isSigner: true, isWritable: true },
     ],
-    data: concatBytes(await sighash("submit_data"), u16),
+    data: Buffer.from(concatBytes(await sighash("submit_data"), u16)),
   });
 }
 

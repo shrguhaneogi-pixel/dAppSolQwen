@@ -64,14 +64,14 @@ export function PhantomProvider({ children }: { children: ReactNode }) {
       setPublicKey(adapter.publicKey ?? null);
     };
 
-    adapter.on("statusChange", sync);
+    (adapter as any).on("statusChange", sync);
     adapter.on("connect", sync);
     adapter.on("disconnect", sync);
     adapter.on("error", sync);
 
     return () => {
       mounted.current = false;
-      adapter.off("statusChange", sync);
+      (adapter as any).off("statusChange", sync);
       adapter.off("connect", sync);
       adapter.off("disconnect", sync);
       adapter.off("error", sync);

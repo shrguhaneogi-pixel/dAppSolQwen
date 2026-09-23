@@ -97,7 +97,8 @@ const DOT_VERT = /* glsl */ `
     vColor = aColor;
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
     vec3 nv = normalize(mat3(modelViewMatrix) * normalize(position));
-    vFace = smoothstep(-0.25, 0.85, dot(nv, normalize(-mv.xyz)));
+    vec3 viewDir = length(mv.xyz) > 0.0001 ? normalize(-mv.xyz) : vec3(0.0, 0.0, 1.0);
+    vFace = smoothstep(-0.25, 0.85, dot(nv, viewDir));
     float twinkle = 0.72 + 0.28 * sin(uTime * 1.7 + aSeed * 42.0);
     float size = uSize * (0.55 + aSeed * 0.8) * twinkle * (1.0 + uSurge * 1.1);
     gl_PointSize = size * uScale / max(0.001, -mv.z);
@@ -226,7 +227,7 @@ const ATMO_FRAG = /* glsl */ `
     float facing = dot(vNormal, vec3(0.0, 0.0, 1.0));
     float rim = clamp(0.74 - facing, 0.0, 1.0);
     float band = clamp((rim - 0.74) / 0.26, 0.0, 1.0);
-    float intensity = pow(band, 1.7) * (0.8 + uSurge * 1.1);
+    float intensity = band > 0.0 ? pow(band, 1.7) * (0.8 + uSurge * 1.1) : 0.0;
     gl_FragColor = vec4(uColor, clamp(intensity, 0.0, 1.0));
   }
 `;
