@@ -38,30 +38,60 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Anchor 0.29 / Solana 1.18 are 2024-era crates, and the SBF toolchain they build with
-      # ships cargo/rustc 1.75 against a v3 lockfile. A period-appropriate host toolchain
-      # keeps `cargo install anchor-cli` compiling without drifting the resolution.
+      # Provides a host cargo for `anchor build`. The SBF compile itself uses the
+      # rustc/cargo 1.75 that ships inside Solana 1.18's platform-tools, so this host
+      # toolchain only has to be new enough to run build scripts and old enough to read
+      # the v3 lockfile.
       - uses: dtolnay/rust-toolchain@1.79.0
         with:
           components: rustfmt, clippy
 
-      - uses: actions/setup-node@v4
+      # Node + Solana CLI + Anchor CLI in one action. Anchor now comes from the npm package
+      # (verified: @coral-xyz/anchor-cli@0.29.0 exists and exposes bin "anchor") instead of
+      # `cargo install anchor-cli`, which was the slow, era-fragile part of this job.
+      #
+      # Read the action's own definition before trusting this to fix the SSL flake - it
+      # installs Solana with the same `curl -sSfL https://release.solana.com/v<ver>/install`
+      # we had inline, so it adds caching but not retries. The recovery step below is what
+      # actually absorbs SSL_ERROR_SYSCALL.
+      - name: Setup Solana and Anchor
+        id: setup_anchor
+        continue-on-error: true
+        uses: metadaoproject/setup-anchor@v3
         with:
-          node-version: 20
-          cache: npm
+          solana-cli-version: '1.18.15'
+          anchor-version: '0.29.0'
+          node-version: '20.16.0'
 
-      - name: Install Solana CLI ${{ env.SOLANA_VERSION }}
+      # The action aborts on the first failed curl, so re-install with backoff and make sure
+      # both CLIs end up present rather than assuming a green step meant a green toolchain.
+      - name: Recover from a flaked Solana CLI download
+        if: steps.setup_anchor.outcome == 'failure'
         run: |
           set -euo pipefail
-          sh -c "$(curl -sSfL https://release.solana.com/${SOLANA_VERSION}/install)"
+          rm -f /tmp/solana-install.sh
+          for attempt in 1 2 3 4 5; do
+            if curl -sSfL --retry 5 --retry-all-errors --retry-delay 3 \
+                 "https://release.solana.com/${SOLANA_VERSION}/install" -o /tmp/solana-install.sh; then
+              break
+            fi
+            echo "solana installer download attempt ${attempt} failed"
+            sleep $((attempt * 5))
+          done
+          test -s /tmp/solana-install.sh
+          sh /tmp/solana-install.sh
           echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
-          solana --version
+          npm i -g "@coral-xyz/anchor-cli@${ANCHOR_VERSION}"
 
-      - name: Install Anchor CLI ${{ env.ANCHOR_VERSION }}
+      - name: Verify the toolchain is usable
         run: |
           set -euo pipefail
-          cargo install --locked anchor-cli --version "${ANCHOR_VERSION}"
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          node --version
+          npm --version
+          solana --version
           anchor --version
+          cargo --version
 
       # Anchor.toml declares wallet = "~/.config/solana/id.json"; without that file every
       # anchor subcommand fails during wallet resolution.
@@ -137,14 +167,36 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@1.79.0
 
-      - name: Install Solana CLI ${{ env.SOLANA_VERSION }}
+      - name: Setup Solana and Anchor
+        id: setup_anchor
+        continue-on-error: true
+        uses: metadaoproject/setup-anchor@v3
+        with:
+          solana-cli-version: '1.18.15'
+          anchor-version: '0.29.0'
+          node-version: '20.16.0'
+
+      # Deploy is the one step that must not run against a half-installed toolchain, so
+      # re-provision anything the action failed to deliver and then assert both CLIs.
+      - name: Ensure the toolchain is present
         run: |
           set -euo pipefail
-          sh -c "$(curl -sSfL https://release.solana.com/${SOLANA_VERSION}/install)"
-          echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
-
-      - name: Install Anchor CLI ${{ env.ANCHOR_VERSION }}
-        run: cargo install --locked anchor-cli --version "${ANCHOR_VERSION}"
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          if ! command -v solana >/dev/null 2>&1; then
+            rm -f /tmp/solana-install.sh
+            for attempt in 1 2 3 4 5; do
+              if curl -sSfL --retry 5 --retry-all-errors --retry-delay 3 \
+                   "https://release.solana.com/${SOLANA_VERSION}/install" -o /tmp/solana-install.sh; then
+                break
+              fi
+              sleep $((attempt * 5))
+            done
+            test -s /tmp/solana-install.sh
+            sh /tmp/solana-install.sh
+          fi
+          anchor --version >/dev/null 2>&1 || npm i -g "@coral-xyz/anchor-cli@${ANCHOR_VERSION}"
+          solana --version
+          anchor --version
 
       - uses: actions/download-artifact@v4
         with:
